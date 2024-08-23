@@ -21,11 +21,14 @@ class ALLinkRenderer extends LinkRenderer {
 	) {
 		Assert::parameterType( [ LinkTarget::class, PageReference::class ], $target, '$target' );
 		$ns = $target->getNamespace();
-		$title = $target->getDBkey();
 		if ( $ns == NS_SPECIAL ) {
 			return parent::makeBrokenLink( $target, $text, $extraAttribs, $query );
 		}
-		$state = Main::getLevelFromCache( Title::newFromText( $target->getText() ), null, null );
+		$title = Title::newFromText( $target->getText() );
+		if ( !$title->canExist() ) {
+			return parent::makeBrokenLink( $target, $text, $extraAttribs, $query );
+		}
+		$state = Main::getLevelFromCache( $title, null, null );
 		if ( $state === 'create' ) {
 			$formatter = MediaWikiServices::getInstance()->getTitleFormatter();
 			return HtmlArmor::getHtml( $text ?? $formatter->getPrefixedText( $target ) );
