@@ -22,7 +22,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use IContextSource;
+use MediaWiki\Context\IContextSource;
 use LogEventsList;
 use LogPage;
 use MediaWiki\Cache\LinkBatchFactory;
@@ -33,8 +33,8 @@ use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Pager\TablePager;
 use MediaWiki\Title\Title;
-use MWException;
-use UserCache;
+use MediaWiki\Cache\UserCache;
+use RuntimeException;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 class AspaklaryaLockedPagesPager extends TablePager {
@@ -267,7 +267,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 				break;
 
 			default:
-				throw new MWException( "Unknown field '$field'" );
+				throw new RuntimeException( "Unknown field '$field'" );
 		}
 
 		return $formatted;

@@ -6,7 +6,7 @@ use Article;
 use ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
-use MediaWiki\Hook\BeforePageDisplayHook;
+use MediaWiki\Output\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\EditPage__showEditForm_initialHook;
 use MediaWiki\Hook\EditPage__showReadOnlyForm_initialHook;
@@ -24,7 +24,7 @@ use MediaWiki\Preferences\Hook\GetPreferencesHook;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserGroupMembership;
-use RequestContext;
+use MediaWiki\Context\RequestContext;
 use WANObjectCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 

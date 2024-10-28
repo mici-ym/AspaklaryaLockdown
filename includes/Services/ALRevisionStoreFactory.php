@@ -57,88 +57,83 @@ use Wikimedia\Rdbms\ILBFactory;
  * @since 1.32
  */
 class ALRevisionStoreFactory extends RevisionStoreFactory {
-		/** @var BlobStoreFactory */
-		private $blobStoreFactory;
-		/** @var ILBFactory */
-		private $dbLoadBalancerFactory;
-		/** @var WANObjectCache */
-		private $cache;
-		/** @var BagOStuff */
-		private $localCache;
-		/** @var LoggerInterface */
-		private $logger;
+	/** @var BlobStoreFactory */
+	private $blobStoreFactory;
+	/** @var ILBFactory */
+	private $dbLoadBalancerFactory;
+	/** @var WANObjectCache */
+	private $cache;
+	/** @var BagOStuff */
+	private $localCache;
+	/** @var LoggerInterface */
+	private $logger;
 
-		/** @var CommentStore */
-		private $commentStore;
-		/** @var ActorMigration */
-		private $actorMigration;
-		/** @var ActorStoreFactory */
-		private $actorStoreFactory;
-		/** @var NameTableStoreFactory */
-		private $nameTables;
+	/** @var CommentStore */
+	private $commentStore;
+	/** @var ActorStoreFactory */
+	private $actorStoreFactory;
+	/** @var NameTableStoreFactory */
+	private $nameTables;
 
-		/** @var SlotRoleRegistry */
-		private $slotRoleRegistry;
+	/** @var SlotRoleRegistry */
+	private $slotRoleRegistry;
 
-		/** @var IContentHandlerFactory */
-		private $contentHandlerFactory;
+	/** @var IContentHandlerFactory */
+	private $contentHandlerFactory;
 
-		/** @var PageStoreFactory */
-		private $pageStoreFactory;
+	/** @var PageStoreFactory */
+	private $pageStoreFactory;
 
-		/** @var TitleFactory */
-		private $titleFactory;
+	/** @var TitleFactory */
+	private $titleFactory;
 
-		/** @var HookContainer */
-		private $hookContainer;
+	/** @var HookContainer */
+	private $hookContainer;
 
-		/**
-		 * @param ILBFactory $dbLoadBalancerFactory
-		 * @param BlobStoreFactory $blobStoreFactory
-		 * @param NameTableStoreFactory $nameTables
-		 * @param SlotRoleRegistry $slotRoleRegistry
-		 * @param WANObjectCache $cache
-		 * @param BagOStuff $localCache
-		 * @param CommentStore $commentStore
-		 * @param ActorMigration $actorMigration
-		 * @param ActorStoreFactory $actorStoreFactory
-		 * @param LoggerInterface $logger
-		 * @param IContentHandlerFactory $contentHandlerFactory
-		 * @param PageStoreFactory $pageStoreFactory
-		 * @param TitleFactory $titleFactory
-		 * @param HookContainer $hookContainer
-		 */
-		public function __construct(
-			ILBFactory $dbLoadBalancerFactory,
-			BlobStoreFactory $blobStoreFactory,
-			NameTableStoreFactory $nameTables,
-			SlotRoleRegistry $slotRoleRegistry,
-			WANObjectCache $cache,
-			BagOStuff $localCache,
-			CommentStore $commentStore,
-			ActorMigration $actorMigration,
-			ActorStoreFactory $actorStoreFactory,
-			LoggerInterface $logger,
-			IContentHandlerFactory $contentHandlerFactory,
-			PageStoreFactory $pageStoreFactory,
-			TitleFactory $titleFactory,
-			HookContainer $hookContainer
-		) {
-			$this->dbLoadBalancerFactory = $dbLoadBalancerFactory;
-			$this->blobStoreFactory = $blobStoreFactory;
-			$this->slotRoleRegistry = $slotRoleRegistry;
-			$this->nameTables = $nameTables;
-			$this->cache = $cache;
-			$this->localCache = $localCache;
-			$this->commentStore = $commentStore;
-			$this->actorMigration = $actorMigration;
-			$this->actorStoreFactory = $actorStoreFactory;
-			$this->logger = $logger;
-			$this->contentHandlerFactory = $contentHandlerFactory;
-			$this->pageStoreFactory = $pageStoreFactory;
-			$this->titleFactory = $titleFactory;
-			$this->hookContainer = $hookContainer;
-		}
+	/**
+	 * @param ILBFactory $dbLoadBalancerFactory
+	 * @param BlobStoreFactory $blobStoreFactory
+	 * @param NameTableStoreFactory $nameTables
+	 * @param SlotRoleRegistry $slotRoleRegistry
+	 * @param WANObjectCache $cache
+	 * @param BagOStuff $localCache
+	 * @param CommentStore $commentStore
+	 * @param ActorStoreFactory $actorStoreFactory
+	 * @param LoggerInterface $logger
+	 * @param IContentHandlerFactory $contentHandlerFactory
+	 * @param PageStoreFactory $pageStoreFactory
+	 * @param TitleFactory $titleFactory
+	 * @param HookContainer $hookContainer
+	 */
+	public function __construct(
+		ILBFactory $dbLoadBalancerFactory,
+		BlobStoreFactory $blobStoreFactory,
+		NameTableStoreFactory $nameTables,
+		SlotRoleRegistry $slotRoleRegistry,
+		WANObjectCache $cache,
+		BagOStuff $localCache,
+		CommentStore $commentStore,
+		ActorStoreFactory $actorStoreFactory,
+		LoggerInterface $logger,
+		IContentHandlerFactory $contentHandlerFactory,
+		PageStoreFactory $pageStoreFactory,
+		TitleFactory $titleFactory,
+		HookContainer $hookContainer
+	) {
+		$this->dbLoadBalancerFactory = $dbLoadBalancerFactory;
+		$this->blobStoreFactory = $blobStoreFactory;
+		$this->slotRoleRegistry = $slotRoleRegistry;
+		$this->nameTables = $nameTables;
+		$this->cache = $cache;
+		$this->localCache = $localCache;
+		$this->commentStore = $commentStore;
+		$this->actorStoreFactory = $actorStoreFactory;
+		$this->logger = $logger;
+		$this->contentHandlerFactory = $contentHandlerFactory;
+		$this->pageStoreFactory = $pageStoreFactory;
+		$this->titleFactory = $titleFactory;
+		$this->hookContainer = $hookContainer;
+	}
 
 		/**
 		 * @since 1.32
@@ -159,7 +154,6 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 				$this->nameTables->getContentModels( $dbDomain ),
 				$this->nameTables->getSlotRoles( $dbDomain ),
 				$this->slotRoleRegistry,
-				$this->actorMigration,
 				$this->actorStoreFactory->getActorStore( $dbDomain ),
 				$this->contentHandlerFactory,
 				$this->pageStoreFactory->getPageStore( $dbDomain ),

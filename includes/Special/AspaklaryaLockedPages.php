@@ -24,10 +24,10 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
-use HTMLForm;
-use HTMLMultiSelectField;
-use HTMLSelectNamespace;
-use HTMLSizeFilterField;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\HTMLForm\Field\HTMLMultiSelectField;
+use MediaWiki\HTMLForm\Field\HTMLSelectNamespace;
+use MediaWiki\HTMLForm\Field\HTMLSizeFilterField;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\CommentStore\CommentStore;
@@ -35,7 +35,7 @@ use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\SpecialPage\SpecialPage;
-use UserCache;
+use MediaWiki\Cache\UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**

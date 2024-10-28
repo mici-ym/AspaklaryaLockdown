@@ -41,13 +41,6 @@ class ALockDownAction extends FormlessAction {
 
 	public function show() {
 		$mContext = $this->getContext();
-		if ( $mContext->getConfig()->get( MainConfigNames::UseMediaWikiUIEverywhere ) ) {
-			$out = $this->getOutput();
-			$out->addModuleStyles( [
-				'mediawiki.ui.input',
-				'mediawiki.ui.checkbox',
-			] );
-		}
 
 		$form = new ALockDownForm( $this->getWikiPage(), $mContext );
 		$form->execute();

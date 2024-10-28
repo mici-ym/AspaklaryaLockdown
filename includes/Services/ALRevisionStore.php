@@ -77,11 +77,6 @@ class ALRevisionStore extends RevisionStore {
 	 */
 	private $commentStore;
 
-	/**
-	 * @var ActorMigration
-	 */
-	private $actorMigration;
-
 	/** @var ActorStore */
 	private $actorStore;
 
@@ -126,7 +121,6 @@ class ALRevisionStore extends RevisionStore {
 	 * @param NameTableStore $contentModelStore
 	 * @param NameTableStore $slotRoleStore
 	 * @param SlotRoleRegistry $slotRoleRegistry
-	 * @param ActorMigration $actorMigration
 	 * @param ActorStore $actorStore
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param PageStore $pageStore
@@ -146,7 +140,6 @@ class ALRevisionStore extends RevisionStore {
 		NameTableStore $contentModelStore,
 		NameTableStore $slotRoleStore,
 		SlotRoleRegistry $slotRoleRegistry,
-		ActorMigration $actorMigration,
 		ActorStore $actorStore,
 		IContentHandlerFactory $contentHandlerFactory,
 		PageStore $pageStore,
@@ -163,7 +156,6 @@ class ALRevisionStore extends RevisionStore {
 			$contentModelStore,
 			$slotRoleStore,
 			$slotRoleRegistry,
-			$actorMigration,
 			$actorStore,
 			$contentHandlerFactory,
 			$pageStore,
@@ -181,7 +173,6 @@ class ALRevisionStore extends RevisionStore {
 		$this->contentModelStore = $contentModelStore;
 		$this->slotRoleStore = $slotRoleStore;
 		$this->slotRoleRegistry = $slotRoleRegistry;
-		$this->actorMigration = $actorMigration;
 		$this->actorStore = $actorStore;
 		$this->wikiId = $wikiId;
 		$this->logger = new NullLogger();
@@ -219,15 +210,15 @@ class ALRevisionStore extends RevisionStore {
 	 * @return PageIdentity
 	 * @throws RevisionAccessException
 	 */
-	private function getPage( ?int $pageId, ?int $revId, int $queryFlags = self::READ_NORMAL ) {
+	private function getPage( ?int $pageId, ?int $revId, int $queryFlags = IDBAccessObject::READ_NORMAL ) {
 		if ( !$pageId && !$revId ) {
 			throw new InvalidArgumentException( '$pageId and $revId cannot both be 0 or null' );
 		}
 
 		// This method recalls itself with READ_LATEST if READ_NORMAL doesn't get us a Title
 		// So ignore READ_LATEST_IMMUTABLE flags and handle the fallback logic in this method
-		if ( DBAccessObjectUtils::hasFlags( $queryFlags, self::READ_LATEST_IMMUTABLE ) ) {
-			$queryFlags = self::READ_NORMAL;
+		if ( DBAccessObjectUtils::hasFlags( $queryFlags, IDBAccessObject::READ_LATEST_IMMUTABLE ) ) {
+			$queryFlags = IDBAccessObject::READ_NORMAL;
 		}
 
 		// Loading by ID is best
@@ -252,8 +243,8 @@ class ALRevisionStore extends RevisionStore {
 		}
 
 		// If we still don't have a title, fallback to primary DB if that wasn't already happening.
-		if ( $queryFlags === self::READ_NORMAL ) {
-			$title = $this->getPage( $pageId, $revId, self::READ_LATEST );
+		if ( $queryFlags === IDBAccessObject::READ_NORMAL ) {
+			$title = $this->getPage( $pageId, $revId, IDBAccessObject::READ_LATEST );
 			if ( $title ) {
 				$this->logger->info(
 					__METHOD__ . ' fell back to READ_LATEST and got a Title.',
@@ -293,7 +284,7 @@ class ALRevisionStore extends RevisionStore {
 			$pageRec = $this->pageStore->getPageByName(
 				$page->getNamespace(),
 				$page->getDBkey(),
-				PageStore::READ_LATEST
+				IDBAccessObject::READ_LATEST
 			);
 			$masterPageId = $pageRec->getId( $this->wikiId );
 			$masterLatest = $pageRec->getLatest( $this->wikiId );
@@ -354,20 +345,23 @@ class ALRevisionStore extends RevisionStore {
 	/**
 	 * @param int $queryFlags a bit field composed of READ_XXX flags
 	 *
-	 * @return DBConnRef
+	 * @return IDatabase
 	 */
 	private function getDBConnectionRefForQueryFlags( $queryFlags ) {
-		[ $mode, ] = DBAccessObjectUtils::getDBOptions( $queryFlags );
-		return $this->getDBConnectionRef( $mode );
+		if ( ( $queryFlags & IDBAccessObject::READ_LATEST ) == IDBAccessObject::READ_LATEST ) {
+			return $this->getDBConnection( DB_PRIMARY );
+		} else {
+			return $this->getDBConnection( DB_REPLICA );
+		}
 	}
 
 	/**
 	 * @param int $mode DB_PRIMARY or DB_REPLICA
 	 * @param string|array $groups
-	 * @return DBConnRef
+	 * @return IDatabase
 	 */
-	private function getDBConnectionRef( $mode, $groups = [] ) {
-		return $this->loadBalancer->getConnectionRef( $mode, $groups, $this->wikiId );
+	private function getDBConnection( $mode, $groups = [] ) {
+		return $this->loadBalancer->getConnection( $mode, $groups, $this->wikiId );
 	}
 
 	/**
@@ -382,7 +376,6 @@ class ALRevisionStore extends RevisionStore {
 	 * @param PageIdentity $page
 	 *
 	 * @return RevisionSlots
-	 * @throws MWException
 	 */
 	private function newRevisionSlots(
 		$revId,
@@ -457,7 +450,7 @@ class ALRevisionStore extends RevisionStore {
 		$revQuery = $this->getSlotsQueryInfo( [ 'content' ] );
 
 		[ $dbMode, $dbOptions ] = DBAccessObjectUtils::getDBOptions( $queryFlags );
-		$db = $this->getDBConnectionRef( $dbMode );
+		$db = $this->getDBConnection( $dbMode );
 
 		$res = $db->select(
 			$revQuery['tables'],
@@ -470,7 +463,7 @@ class ALRevisionStore extends RevisionStore {
 			$revQuery['joins']
 		);
 
-		if ( !$res->numRows() && !( $queryFlags & self::READ_LATEST ) ) {
+		if ( !$res->numRows() && !( $queryFlags & IDBAccessObject::READ_LATEST ) ) {
 			// If we found no slots, try looking on the primary database (T212428, T252156)
 			$this->logger->info(
 				__METHOD__ . ' falling back to READ_LATEST.',
@@ -481,7 +474,7 @@ class ALRevisionStore extends RevisionStore {
 			);
 			return $this->loadSlotRecordsFromDb(
 				$revId,
-				$queryFlags | self::READ_LATEST,
+				$queryFlags | IDBAccessObject::READ_LATEST,
 				$page
 			);
 		}
@@ -681,7 +674,7 @@ class ALRevisionStore extends RevisionStore {
 			->joinUser()
 			->where( $conditions )
 			->options( $options );
-		if ( ( $flags & self::READ_LOCKING ) == self::READ_LOCKING ) {
+		if ( ( $flags & IDBAccessObject::READ_LOCKING ) == IDBAccessObject::READ_LOCKING ) {
 			$queryBuilder->forUpdate();
 		}
 		return $queryBuilder->caller( __METHOD__ )->fetchRow();
@@ -692,7 +685,6 @@ class ALRevisionStore extends RevisionStore {
 	 * RevisionStore is bound to.
 	 *
 	 * @param IReadableDatabase $db
-	 * @throws MWException
 	 */
 	private function checkDatabaseDomain( IReadableDatabase $db ) {
 		$dbDomain = $db->getDomainID();
@@ -701,7 +693,7 @@ class ALRevisionStore extends RevisionStore {
 			return;
 		}
 
-		throw new MWException( "DB connection domain '$dbDomain' does not match '$storeDomain'" );
+		throw new RuntimeException( "DB connection domain '$dbDomain' does not match '$storeDomain'" );
 	}
 
 	/**
@@ -718,7 +710,6 @@ class ALRevisionStore extends RevisionStore {
 	 *   data is returned from getters, by querying the database as needed
 	 *
 	 * @return RevisionRecord
-	 * @throws MWException
 	 * @throws RevisionAccessException
 	 * @see RevisionFactory::newRevisionFromRow
 	 */
@@ -794,7 +785,7 @@ class ALRevisionStore extends RevisionStore {
 						$db,
 						[ 'rev_id' => intval( $revId ) ]
 					);
-					if ( !$row && !( $queryFlags & self::READ_LATEST ) ) {
+					if ( !$row && !( $queryFlags & IDBAccessObject::READ_LATEST ) ) {
 						// If we found no slots, try looking on the primary database (T259738)
 						$this->logger->info(
 							'RevisionStoreCacheRecord refresh callback falling back to READ_LATEST.',
@@ -803,7 +794,7 @@ class ALRevisionStore extends RevisionStore {
 								'exception' => new RuntimeException(),
 							]
 						);
-						$dbw = $this->getDBConnectionRefForQueryFlags( self::READ_LATEST );
+						$dbw = $this->getDBConnectionRefForQueryFlags( IDBAccessObject::READ_LATEST );
 						$row = $this->fetchRevisionRowFromConds(
 							$dbw,
 							[ 'rev_id' => intval( $revId ) ]

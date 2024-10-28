@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
-use DatabaseUpdater;
+use MediaWiki\Installer\DatabaseUpdater;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 
 class SchemaUpdater implements LoadExtensionSchemaUpdatesHook {

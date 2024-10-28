@@ -21,10 +21,9 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use ChangeTags;
-use DeferredUpdates;
-use HtmlCacheUpdater;
-use IContextSource;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Cache\HTMLCacheUpdater;
+use MediaWiki\Context\IContextSource;
 use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\HookContainer\HookContainer;

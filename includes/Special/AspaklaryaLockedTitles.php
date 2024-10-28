@@ -24,8 +24,8 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
 use HtmlArmor;
-use HTMLForm;
-use HTMLSelectNamespace;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\HTMLForm\Field\HTMLSelectNamespace;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedTitlesPager;
 use MediaWiki\Html\Html;

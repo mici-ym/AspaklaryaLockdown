@@ -24,7 +24,7 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
 use ErrorPageError;
-use HTMLForm;
+use MediaWiki\HTMLForm\HTMLForm;
 use LogEventsList;
 use LogPage;
 use MediaWiki\CommentStore\CommentStore;
@@ -301,7 +301,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				'cssclass' => 'wpReasonDropDown',
 				'id' => 'wpRevLockReasonList',
 				'name' => 'wpRevLockReasonList',
-				'options' => Xml::listDropDownOptions(
+				'options' => Html::listDropDownOptions(
 					$dropDownReason,
 					[ 'other' => $this->msg( 'revlock-reasonotherlist' )->text() ]
 				),

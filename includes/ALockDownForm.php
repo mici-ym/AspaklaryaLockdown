@@ -26,8 +26,8 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use HTMLForm;
-use IContextSource;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Context\IContextSource;
 use Language;
 use LogEventsList;
 use LogPage;
@@ -259,7 +259,7 @@ class ALockDownForm {
 				'id' => 'aLockdownReasonSelection',
 				'name' => 'aLockdownReasonSelection',
 				'flatlist' => true,
-				'options' => Xml::listDropDownOptions(
+				'options' => Html::listDropDownOptions(
 					$this->mContext->msg( 'aLockdown-dropdown' )->inContentLanguage()->text(),
 					[ 'other' => $this->mContext->msg( 'aLockdown-otherreason-op' )->inContentLanguage()->text() ]
 				),

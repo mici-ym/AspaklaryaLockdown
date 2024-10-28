@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use IContextSource;
+use MediaWiki\Context\IContextSource;
 use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
@@ -11,7 +11,7 @@ use MediaWiki\Title\Title;
 use MediaWiki\User\User;
 use MediaWiki\User\UserGroupMembership;
 use MediaWiki\User\UserIdentity;
-use RequestContext;
+use MediaWiki\Context\RequestContext;
 use WANObjectCache;
 use Wikimedia\Rdbms\LoadBalancer;
 
