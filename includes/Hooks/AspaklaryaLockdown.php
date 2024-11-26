@@ -25,6 +25,7 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserGroupMembership;
 use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
 use WANObjectCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 
@@ -76,6 +77,16 @@ class AspaklaryaLockdown implements
 		$mannager = new Main( $this->loadBalancer, $this->cache, $title, $user );
 		if ( !$mannager->isUserAllowedToEdit() ) {
 			$out->redirect( $title->getLocalURL() );
+		}
+		if ( $user->isAllowed("aspaklarya_lockdown") ) {
+			return;
+		}
+		$wikitext = $editor->textbox1;
+		$hasTemplate = $this->checkTemplates($wikitext);
+		if ( $hasTemplate ) {
+			$editor->textbox1 = '';
+			$editor->editFormTextBeforeContent .= Html::errorBox($out->msg("has-filter-template"));
+			$out->addHeadItem("style", "#wpTextBox1 { display: none");
 		}
 	}
 
@@ -340,13 +351,14 @@ class AspaklaryaLockdown implements
 	/**
      * @inheritdoc
      */
-	public function checkTemplates( $text ) {
+	private function checkTemplates( $text ) {
 		$templates = ["תמונה חילופית", "סינון/שורה", "סינון/פסקה"];
 		foreach ( $templates as $template ) {
 			if ( strpos( $text, "{{" . $template ) !== false ) {
 				return true;
 			}
 		}
+		return false;
 	}
 
 }
