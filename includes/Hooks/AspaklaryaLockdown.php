@@ -337,4 +337,16 @@ class AspaklaryaLockdown implements
 		return $links;
 	}
 
+	/**
+     * @inheritdoc
+     */
+	public function checkTemplates( $text ) {
+		$templates = ["תמונה חילופית", "סינון/שורה", "סינון/פסקה"];
+		foreach ( $templates as $template ) {
+			if ( strpos( $text, "{{" . $template ) !== false ) {
+				return true;
+			}
+		}
+	}
+
 }
